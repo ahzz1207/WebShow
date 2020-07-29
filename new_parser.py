@@ -6,9 +6,10 @@ import jinja2
 from bs4 import BeautifulSoup
 import re
 
+template_path = '/Users/zhuangzehuang/Downloads/web_app/templates'
 app = Sanic(__name__)
 env = jinja2.Environment(
-    loader=jinja2.FileSystemLoader('/Users/zhuangzehuang/Downloads/web_app/templates')
+    loader=jinja2.FileSystemLoader(template_path)
 )
 
 app.static('/static', './static')
@@ -45,7 +46,7 @@ def clear_all():
     clear_map_h5()
 
 
-def close_br(h5_path, saved_path):
+def close_tr(h5_path, saved_path):
     line = open(h5_path, "r", encoding="utf-8").readlines()
     i = 0
     length = len(line)
@@ -74,20 +75,6 @@ def close_br(h5_path, saved_path):
     # h5_path = os.path.join(static_path, 'draw', h5_name)
     open(saved_path, "w", encoding="utf-8").writelines(line)
     print(f"write done {saved_path}")
-
-
-def edit(str1, str2):
-    matrix = [[i + j for j in range(len(str2) + 1)] for i in range(len(str1) + 1)]
-
-    for i in range(1, len(str1) + 1):
-        for j in range(1, len(str2) + 1):
-            if str1[i - 1] == str2[j - 1]:
-                d = 0
-            else:
-                d = 1
-            matrix[i][j] = min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + d)
-
-    return matrix[len(str1)][len(str2)]
 
 
 def inserts(str, left, right):
@@ -120,7 +107,6 @@ def draw(text, poses):
             y_abs = abs(y1 - y2)
             file_abs_path = os.path.join(root_path, 'draw', 'p' +str(xy[8]) + '.jpg')
 
-            # file_abs_path = os.path.join(root_path, 'draw', 'p'+str(int(xy[8])+1)+'.jpg')
             image = Image.open(file_abs_path)
             draw = ImageDraw.Draw(image)
             # TODO
@@ -143,37 +129,6 @@ def draw(text, poses):
 def template(tpl, **kwargs):
     template = env.get_template(tpl)
     return response.html(template.render(kwargs))
-
-
-def highlight2(h5_path, text_, xy_):
-    file_name = h5_path.split(os.path.sep)[-1]
-
-    h5 = open(h5_path, 'r', encoding='utf-8').readlines()
-    for ti, xy in enumerate(xy_):
-        top = xy[0]
-        left = xy[1]
-        text = text_[ti]
-        match = """<div style="top:""" + top + ".000000px" + "; left:" + left + ".000000px" + """; position:absolute;">"""
-        index = 0
-        while index < len(h5):
-            if h5[index] == match:
-                # 加mark
-                index += 1
-                temp = h5[index]
-                if temp.find("<br>") >= 0:
-                    temps = temp.split('<br>')
-                    for i in range(len(temps)):
-                        if temps[i].find(text) >= 0:
-                            temps[i] = temps[i].replace(text, "<mark>" + text + "</mark>")
-                    temp = '<br>'.join(temps)
-                    h5[index] = temp
-                else:
-                    h5[index] = temp.replace(text, "<mark>" + text + "</mark>")
-            index += 1
-    file_path = os.path.join(root_path, "draw", file_name)
-
-    open(file_path, 'w', encoding="utf-8",).writelines(h5)
-    return file_path
 
 
 def highlight(text, h5_pos):
@@ -204,21 +159,6 @@ def highlight(text, h5_pos):
                     col = 1
 
                     for td in tr.find_all('td'):
-                        # 修正偏移量
-                        # if 'rowspan' in td.attrs and 'colspan' not in td.attrs:
-                        #     temp_row = int(td.attrs['rowspan'])
-                        #     if row < x < temp_row + row:
-                        #         y -= 1
-                        # elif 'rowspan' not in td.attrs and 'colspan' in td.attrs:
-                        #     temp_col = int(td.attrs['colspan'])
-                        #     if x == row:
-                        #         y -= (temp_col - 1)
-                        # elif 'rowspan' in td.attrs and 'colspan' in td.attrs:
-                        #     temp_row = int(td.attrs['rowspan'])
-                        #     temp_col = int(td.attrs['colspan'])
-                        #     if row <= x < temp_row + row:
-                        #         y -= (temp_col - 1)
-
                         # 对偏移量进行计算
                         rowspan = int(td.attrs['rowspan']) if 'rowspan' in td.attrs else 1
                         colspan = int(td.attrs['colspan']) if 'colspan' in td.attrs else 1
@@ -240,31 +180,6 @@ def highlight(text, h5_pos):
                         row += 1
                         continue
                     break
-
-
-                        # for tr in table.find_all("tr"):
-                        #     clo = 1
-                        #     td = tr.find('td')
-                            # if 'rowspan' in td.attrs:
-                            #     temp_row = row
-                            #     span = int(td['rowspan']) + temp_row - 1
-                            # if 'colspan' in td.attrs:
-                            #     temp_clo = clo
-                            #     span_c = int(td['colspan'])
-                            # for td in tr.find_all("td"):
-                                # if span >= row > temp_row:
-                                #     if row == x and (clo + 1) == y:
-                                #         td['style'] = sty
-                                #
-                                # else:
-                                #     if row == x and clo == y:
-                                #         td['style'] = sty
-                                # clo += 1
-
-                            # if span == row:
-                            #     span = 0
-                            #     temp_row = 0
-                            # row += 1
 
             elif len(xy_) == 9:
                 print(xy_)
@@ -432,12 +347,8 @@ def show(request, file):
                             t += match[0].split('<')[-1].split('>')[0]
                         show_text.append(t)
 
-                    # if len(pic_names) > 1:
-                    #     pic_desc = " 页码" + pic_names[0].replace(".jpg", "") + "-页码" + pic_names[1].replace(".jpg", "")
-                    # else:
-                    #     pic_desc = " 页码" + pic_names[0].replace(".jpg", "")
-                    for h in pic_names:
-                        pic_desc = " 页码- " + h.replace(".html", "")
+                    for p in pic_names:
+                        pic_desc = " 页码- " + p.replace(".html", "")
 
                     keys_map[key].append((pic_names, (poses, text), pic_desc, show_text))
         print(keys_map)
@@ -465,7 +376,6 @@ def show_h5(request, file):
             return template('runtime.html', keys_map=keys_map, contract_num=contract_num['c'],
                             pics=all_pics, res_button="True", file="《"+file+"》")
         elif 'show_text' in request.form.keys():
-            h5 = []
             key = request.form.get('show_text')
             entities = keys_map[key]
 
@@ -483,16 +393,10 @@ def show_h5(request, file):
             h5_draw_path = [os.path.join(static_path, i) for i in all_h5]
 
             for i, h5_path in enumerate(all_h5_path):
-                close_br(h5_path, h5_saved_path[i])
-                # soup = BeautifulSoup(open(h5_path, 'r'), "html.parser")
-                # strs = soup.prettify(encoding="utf-8")
-                # with open(h5_saved_path[i], "wb")as f:
-                #     f.write(strs)
-                # f.close()
+                close_tr(h5_path, h5_saved_path[i])
 
             for e in entities:
                 text = e[1][1]
-                h5_names = e[0]
                 table_pos = e[1][0]
                 highlight(text, table_pos)
 
@@ -557,7 +461,6 @@ def show_h5(request, file):
 
 @app.route('/', methods=['GET', 'POST'])
 def homepage(request):
-    # test_html = os.path.join(app.config['HTML_FOLDER'], 'train.html')
     if request.method == 'POST':
         # 进入上传页面
         if 'upload' in request.form.keys():
