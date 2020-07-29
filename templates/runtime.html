@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+    <style type='text/css'>
+        /*下面的星号让素有元素内外边距都为0，不留空隙*/
+        *{
+            padding:0px;
+            margin:0px;
+        /*我们让整个屏幕都有一种淡淡的背景色*/
+        }
+        html, body{
+            background-color:lightcyan;
+            width:100%;
+            height:100%;
+        }
+        /*下面这个box是承载全部网页内容的容器样式，是下面所有div元素的父级元素的样式，注意一定要先将字号设为0，否则主体和页脚之间会有一条白色缝隙*/
+        #box{
+            width:1200px;
+            margin:0 auto;
+            font-size:0;
+        }
+        #logo{
+            display:inline-block;
+            width:700px;
+            height:auto;
+            float:left;
+            background-color:lightgoldenrodyellow;
+        }
+        #nav{
+            display:inline-block;
+            width:300px;
+            height:100%;
+            float:left;
+            {#background-color:lightseagreen;#}
+            background-size:cover;
+        }
+        #main{
+            position: absolute;
+            display:inline-block;
+            {#width:800px;#}
+            height:100%;
+            float:left;
+        }
+        #key{
+            position:relative;
+            left:200px;
+            top:200px;
+        }
+        #container{
+            overflow:hidden;
+        }
+    </style>
+
+	<style>
+        a{
+            display:inline-block;
+            width: 200px;
+            height:100px;
+            background: gray no-repeat fixed 10px center;
+            text-indent:20px;
+        }
+        .box{
+            display:flex;
+            flex-shrink: 1;
+            justify-content: center;
+            width:2500px;
+            height:2000px;
+        }
+
+	</style>
+</head>
+<body>
+{#<div id="box">#}
+    <div id="nav">
+        <h2 align="center">CloudWalk</h2>
+        <img src="/static/draw/cloudwalk.png" style="align-self:center">
+
+        <form action="" method="post" style="overflow:auto" align="center">
+            <button name="upload" value="true" style="width:150px;height:70px;margin-top:20px;font-size:100%">上传文件</button>
+        </form>
+
+        {% if res_button == "True" %}
+        <form action="" method="post" align="center">
+            <button name="restart" value="true" style="width:250px;height:100px;margin-top:20px;font-size:100%">回到首页</button>
+        </form>
+        {% endif%}
+
+        <h2 align="center" style="margin-top:50px">文件列表</h2>
+
+        {% for file in files %}
+            <dl>
+                <form action="" method="post" align="center">
+                    <button name="file" value={{ file }} style="width:250px;height:50px;font-size:100%">{{ file }} </button>
+                </form>
+            </dl>
+        {% endfor %}
+
+
+    </div>
+    <div id="logo" align="center">
+        <h1>{{ file }}</h1>
+        {% if all != "false" %}
+        <form action="" method="post" style="overflow:auto" align="center">
+            <button name="all" value="true" style="width:300px;height:70px;margin-top:20px;font-size:100%">显示合同: 共{{ contract_num }}个合同</button>
+        </form>
+        {% endif %}
+        <table border="1">
+
+            <tr>
+                <th style="font-size:200%">key</th>
+                <th style="font-size:200%">文本</th>
+            </tr>
+            {% for key in keys_map %}
+                <tr>
+                    <td>
+                        <form action="" method="post" style="float: left; overflow:auto">
+                            <button name="show_text" value={{ key }} style="float:left; width:150px; height:150px; font-size:120%">{{key}}</button>
+                        </form>
+                    </td>
+                    <td>
+                        {% for entitiy in keys_map[key] %}
+                            <dl>
+                                <h3>{{ entitiy[2] }}</h3>
+                                {% for text in entitiy[3] %}
+                                    <p style="font-size:140%;text-align:justify;word-break:break-word">{{ text }}</p>
+{#                                    <dt><textarea name="textfield" cols="40" rows="1" id="textfield" TextMode="MultiLine" wrap="virtual"#}
+{#                                                  style="overflow:hidden;font-size:100%;height:30px;width:300px;">#}
+{#                                        {{ text }}#}
+{#                                    </textarea></dt>#}
+{#                                    <dt><input type="text" size="40" maxlength="40" value={{ text }} style="font-size:120%"></dt>#}
+                                {% endfor %}
+                            </dl>
+                        {% endfor %}
+                </tr>
+            {% endfor%}
+        </table>
+    </div>
+{#    style="position: relative; margin-left:10%; margin-right:10%; top: 20%"#}
+{#    <div id="main">#}
+{#        <h1 align="center">图片展示区域</h1>#}
+{#            <dt>#}
+{#            {% for p in pics %}#}
+{#                <dl>#}
+{#                    <img class=".box" src={{ p }}>#}
+{#                </dl>#}
+{#            {% endfor %}#}
+{#            </dt>#}
+{#    </div>#}
+    <div id="main">
+        <h1 align="center">展示区域</h1>
+            <dt>
+                {% for h in pics %}
+                    <iframe class="box" src={{ h }}></iframe>
+                {% endfor %}
+            </dt>
+    </div>
+
+</body>
+</html>
